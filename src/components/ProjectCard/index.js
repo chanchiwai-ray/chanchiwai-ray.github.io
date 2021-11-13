@@ -12,7 +12,11 @@ export default function ProjectCard({
     <div className={`card ${styles.card}`}>
       {image ? (
         <div className={`${styles.cardImageContainer}`}>
-          <img src={image} className={`${styles.cardImage} rounded card-img-top`} />
+          <img
+            src={image}
+            className={`${styles.cardImage} rounded card-img-top`}
+            alt="Project Image"
+          />
         </div>
       ) : null}
       <div className="card-body">

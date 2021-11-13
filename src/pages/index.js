@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import styles from "../../styles/home.module.css";
 import MainLayout from "../layouts/MainLayout";
 import HistoryItem from "../components/HistoryList";
@@ -16,6 +14,7 @@ export default function Home() {
               <img
                 className={`${styles.portrait} rounded-circle`}
                 src="/images/chiwai_chan.png"
+                alt="Personal Portrait"
               />
             </div>
             <div className="col-lg-9 px-5">
