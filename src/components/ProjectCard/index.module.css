@@ -1,0 +1,19 @@
+.card {
+  margin: 1rem;
+}
+
+.card:hover {
+  scale: 1.03;
+  transition: scale linear 0.1s;
+}
+
+.cardImageContainer {
+  text-align: center;
+  border-bottom: solid 1px rgba(0, 0, 0, 0.125);
+}
+
+.cardImage {
+  height: 150px;
+  max-height: 200px;
+  width: auto;
+}
