@@ -15,6 +15,11 @@ const navs = [
     label: "Works",
     iconText: "bi bi-code-slash",
   },
+  {
+    href: "/notes",
+    label: "Notes",
+    iconText: "bi bi-journal-text",
+  },
 ];
 
 const footerLinks = [

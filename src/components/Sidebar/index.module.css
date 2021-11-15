@@ -1,0 +1,43 @@
+.container {
+  height: 100%;
+  background-color: #fafafa;
+  border-right: 1px solid lightgray;
+}
+
+.link {
+  text-transform: capitalize;
+  color: rgb(100, 100, 100, 0.8);
+  margin-bottom: 5px;
+  padding: 0.5rem 0.8rem;
+  display: block;
+  transition: all 0.1s ease-in-out;
+}
+
+.link:hover {
+  cursor: pointer;
+  color: rgb(0, 115, 246);
+  text-decoration: none;
+  background-color: lightgray;
+}
+
+.linkFocus {
+  font-weight: 700;
+  color: rgb(0, 115, 246) !important;
+  box-shadow: 5px 0px 0px 0px rgb(0, 115, 246) inset;
+  -webkit-box-shadow: 5px 0px 0px 0px rgb(0, 115, 246) inset;
+  -moz-box-shadow: 5px 0px 0px 0px rgb(0, 115, 246) inset;
+  background-color: lightgray;
+}
+
+.linkText {
+}
+
+@media screen and (max-width: 992px) {
+  .link {
+    color: rgb(100, 100, 100, 0.8);
+    margin: 0;
+    padding: 1rem;
+    display: block;
+    transition: all 0.1s ease-in-out;
+  }
+}
