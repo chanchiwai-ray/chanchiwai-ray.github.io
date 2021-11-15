@@ -47,7 +47,7 @@ export default function Home() {
                     cloud computing
                   </span>
                 </a>{" "}
-                and maching learning.
+                and machine learning.
               </p>
             </div>
           </div>
