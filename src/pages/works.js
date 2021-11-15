@@ -38,7 +38,7 @@ export default function Works() {
                 title="Dashboard"
                 subtitle="ReactJS | ExpressJS | MongoDB | Docker | Raspberry Pi"
                 description="A personal dashboard for managing personal data."
-                href="https://github.com/chanchiwai-ray/website"
+                href="https://github.com/chanchiwai-ray/dashboard"
                 hrefLabel="Github"
               />
             </div>
@@ -48,7 +48,7 @@ export default function Works() {
                 title="Personal Website"
                 subtitle="Next.js | Github Page"
                 description="A personal website build with Nextjs and powered by github page (this site)."
-                href="https://github.com/chanchiwai-ray/website"
+                href="https://github.com/chanchiwai-ray/chanchiwai-ray.github.io"
                 hrefLabel="Github"
               />
             </div>
