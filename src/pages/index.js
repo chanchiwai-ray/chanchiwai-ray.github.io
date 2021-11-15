@@ -32,11 +32,11 @@ export default function Home() {
                 in the presence of gravitational wave signals for{" "}
                 <a href="https://git.ligo.org/lscsoft/gstlal">GstLAL</a> pipeline.
                 Currently, I am working on reducing the noise in the GW strain data with
-                machine learning, using the information from the physical enviornment
+                machine learning, using the information from the physical environment
                 monitoring system.
               </p>
               <p className="lead text-muted text-lg-start text-center">
-                In addition to research, I am also interesting in software development,{" "}
+                In addition to research, I am also interested in software development,{" "}
                 <a href="https://www.cloudskillsboost.google/public_profiles/0077dcbb-c0f7-4204-b5cf-08124d175b86">
                   <span
                     data-bs-toggle="tooptip"
@@ -80,7 +80,7 @@ export default function Home() {
               bulletPoints={[
                 "Worked on developing scientific software for the detectiong of Gravitational Waves",
                 "Developed matched-filtering tool for offline analysis which is crucial for follow up analysis",
-                "Implemented background estimation technique in the offliine search pipeline to address the unsolved background contamination problems",
+                "Implemented background estimation technique in the offline search pipeline to address the unsolved background contamination problems",
               ]}
             />
             <HistoryItem
