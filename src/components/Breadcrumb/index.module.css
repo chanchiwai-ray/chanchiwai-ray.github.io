@@ -1,0 +1,20 @@
+.container {
+  padding: 0 1rem;
+}
+
+.breadcrumb {
+  padding: 0.5rem 0;
+}
+
+.breadcrumbItem {
+  text-transform: capitalize;
+  text-decoration: underline;
+}
+
+.breadcrumbItem:hover {
+  cursor: pointer;
+}
+
+.breadcrumbActiveItem {
+  text-decoration: none;
+}

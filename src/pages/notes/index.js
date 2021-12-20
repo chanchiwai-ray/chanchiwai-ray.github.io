@@ -16,7 +16,6 @@ export default function Notes({ categories }) {
 
 export async function getStaticProps() {
   const categories = getTopLevelNoteCategories();
-  console.log(categories);
   return {
     props: {
       categories,

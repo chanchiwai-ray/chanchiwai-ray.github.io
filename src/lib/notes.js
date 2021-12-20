@@ -12,6 +12,22 @@ import remarkToc from "remark-toc";
 import rehypeMathjax from "rehype-mathjax";
 import rehypeStringify from "rehype-stringify";
 
+//
+// These utility functions are expecting a 'notes' directory in the project's
+// root directory. In the 'notes', there should be containing different
+// categories of notes that are defined by the directory name. Under each
+// category, there should be only markdown files (.md extension) and should not
+// contain more directories. The structure is shown below:
+//
+//               notes
+//                 |
+//      -----------------------
+//      |          |          |
+//     dirA       ....       dirB
+//      |         ....        |
+// f1.md f2.md    ....   f1.md f2.md
+//
+
 const noteDirectory = path.join(process.cwd(), "notes");
 
 // Recursively build up the relative path lists.
@@ -101,9 +117,12 @@ export function getNoteFiles(category) {
   return files
     .filter((file) => !file.isDirectory())
     .map((file) => {
+      const filename = file.name.replace(/\.md$/, "");
       return {
-        name: file.name,
-        href: `/notes/${category}/${file.name.replace(/\.md$/, "")}`,
+        id: category + filename,
+        filename: filename,
+        href: `/notes/${category}/${filename}`,
+        label: filename.replace(/[0-9_\-\/\\]/g, " ").trim(),
       };
     });
 }

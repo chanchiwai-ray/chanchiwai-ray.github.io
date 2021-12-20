@@ -9,15 +9,3 @@
 .backButton:hover {
   cursor: pointer;
 }
-
-.subNav {
-  padding: 0;
-}
-
-.subNavList {
-  padding: 0.5rem 0;
-}
-
-.navText {
-  text-transform: capitalize;
-}

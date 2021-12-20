@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Script from "next/script";
+import "../../styles/github.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 

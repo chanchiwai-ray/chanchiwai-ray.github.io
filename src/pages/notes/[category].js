@@ -2,17 +2,10 @@ import { getTopLevelNoteCategories, getNoteFiles } from "../../lib/notes";
 import MainLayout from "../../layouts/MainLayout";
 import NoteLayout from "../../layouts/NoteLayout";
 
-export default function Notes({ noteData, sidebarNavs, paths }) {
+export default function Notes({ paths, noteData, sidebarNavs }) {
   return (
     <MainLayout>
-      <NoteLayout
-        sideNavs={sidebarNavs.map((nav) => ({
-          ...nav,
-          label: nav.name.replace(/\.md$/, "").replace(/[0-9_\-\/\\]/g, " "),
-        }))}
-        data={noteData}
-        paths={paths}
-      />
+      <NoteLayout paths={paths} data={noteData} sidebarNavs={sidebarNavs} />
     </MainLayout>
   );
 }
@@ -26,7 +19,6 @@ export async function getStaticPaths() {
       },
     };
   });
-  console.log(paths);
   return {
     paths: paths,
     fallback: false,
@@ -35,7 +27,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const sidebarNavs = getNoteFiles(params.category);
-  const paths = [params.category];
+  const paths = [[params.category]];
   const noteData = { title: "" };
   return {
     props: {
