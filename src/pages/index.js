@@ -60,15 +60,28 @@ export default function Home() {
               <span className="bi bi-clock-history"></span> Experience
             </h3>
             <HistoryItem
+              title="Research Center for the Early Universe, University of Tokyo"
+              subtitle="Project Researcher"
+              date="July 2021 - Present"
+              location="Tokyo, Japan"
+              description=""
+              bulletPoints={[
+                "Help re-analyzing old data with latest GstLAL pipeline on LIGO Caltech computing cluster.",
+                "Help improving GstLAL pipeline for the next observing run.",
+                "Developed static group website and tutorials with Gatsby Framework.",
+              ]}
+            />
+            <HistoryItem
               title="HENNGE"
               subtitle="Software Engineer Intern"
               date="July 2021 - Aug. 2021"
               location="Tokyo, Japan"
               description=""
               bulletPoints={[
-                "Fullstack development with Python, Redis, Google OAuth 2.0, MinIO and Nginx",
-                "Containerized the application with Docker and deployed manaully on AWS.",
-                "Automated the deployment and destruction processes with Terraform (infrastructure-as-a-code)",
+                "Social media application development with Python (Flask framework).",
+                "Implemented authentication / login system with Google OAuth 2.0 and Redis.",
+                "Implemented text / image storage system with Redis and MinIO.",
+                "Employed micro-services architecture and deployed with Docker, AWS, Terraform (infrastructure-as-code",
               ]}
             />
             <HistoryItem

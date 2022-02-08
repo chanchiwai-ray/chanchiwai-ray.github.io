@@ -17,7 +17,7 @@ export default function Works() {
                 image=""
                 title="Twitter Clone"
                 subtitle="Python | Redis | Google OAuth 2.0 | MinIO | Nginx"
-                description="A minialist clone of Twitter built with Python and Flask."
+                description="A minimalist clone of Twitter built with Python and Flask."
                 href="https://github.com/chanchiwai-ray/twitter-clone"
                 hrefLabel="Github"
               />
@@ -27,7 +27,7 @@ export default function Works() {
                 image=""
                 title="Google Drive CLI"
                 subtitle="Python | Google Drive API"
-                description="Command Line interface for Google Drive using Google Drive API."
+                description="Command line interface for Google Drive using Google Drive API."
                 href="https://github.com/chanchiwai-ray/google-drive-cli"
                 hrefLabel="Github"
               />
