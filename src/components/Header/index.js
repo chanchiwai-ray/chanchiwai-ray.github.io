@@ -6,10 +6,8 @@ export default function Header({ navs }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
       <div className="container">
-        <Link href="/">
-          <a className="navbar-brand" aria-current="page">
-            <span> Chi Wai CHAN</span>
-          </a>
+        <Link href="/" id="/" className="navbar-brand" aria-current="page">
+          <span> Chi Wai CHAN</span>
         </Link>
         <button
           className="navbar-toggler"
@@ -30,10 +28,8 @@ export default function Header({ navs }) {
             {navs && navs.length > 1
               ? navs.map((nav, idx) => (
                   <li key={idx} className="nav-item">
-                    <Link href={nav.href}>
-                      <a className="nav-link" aria-current="page">
-                        <span className={nav.iconText}> {nav.label}</span>
-                      </a>
+                    <Link href={nav.href} id={nav.href} className="nav-link" aria-current="page">
+                      <span className={nav.iconText}> {nav.label}</span>
                     </Link>
                   </li>
                 ))
