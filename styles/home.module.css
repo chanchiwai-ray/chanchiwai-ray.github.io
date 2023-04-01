@@ -47,10 +47,12 @@
 }
 
 .coverImage {
-  background: url("/images/rainbow-bridge-1920_480.jpg");
   margin-top: -56px;
   min-height: 480px;
+  background: #1b1b1b;
+  background-image: url("/images/rainbow-bridge-1920_480.jpg");
   background-repeat: no-repeat;
+  background-position: top;
   background-attachment: fixed;
 }
 
