@@ -25,9 +25,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: exported-build
-      - name: Unzip build
-        run: |
-          unzip ./exported-build.zip -d ./out
       - name: Debug
         run: |
           ls -l ./out
