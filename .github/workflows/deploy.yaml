@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yaml
+
+  deploy:
+    needs: check
+    name: GitHub page
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout to repository
+        uses: actions/checkout@v4
+      - name: Download exported static website
+        uses: actions/download-artifact@v4
+        with:
+          name: exported-build
+          path: ./
+      - name: Deploy the static website to GitHub
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out

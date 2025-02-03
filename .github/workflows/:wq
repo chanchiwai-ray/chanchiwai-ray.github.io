@@ -1,0 +1,56 @@
+name: Check
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  EXPORT: export
+  UNOPTIMIZED: true
+
+jobs:
+  lint:
+    name: Code quality
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout to repository
+        uses: actions/checkout@v4
+      - name: Setup latest NodeJS
+        uses: actions/setup-node@v4
+        with:
+          cache: "npm"
+      - name: Install project
+        run: |
+          npm install
+      - name: Run lint
+        run: |
+          npm run lint
+
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout to repository
+        uses: actions/checkout@v4
+      - name: Setup latest NodeJS
+        uses: actions/setup-node@v4
+        with:
+          cache: "npm"
+      - name: Install project
+        run: |
+          npm install
+      - name: Test build
+        run: |
+          npm run build
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: exported-build
+          path: ./out
