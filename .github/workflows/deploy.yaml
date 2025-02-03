@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yaml
+
+  deploy:
+    name: GitHub page
+    runs-on: ubuntu-24.04
+    environment:
+      EXPORT: "export"
+      UNOPTIMIZED: true
+    steps:
+      - name: Checkout to repository
+        uses: actions/checkout@v4
+      - name: Setup latest NodeJS
+        uses: actions/setup-node@v4
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Build and export the static site
+        run: |
+          npm install
+          npm run build
+      - name: Deploy the static site
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
