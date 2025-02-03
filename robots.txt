@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+
+Host: https://chanchiwai-ray.github.io
+Sitemap: https://chanchiwai-ray.github.io/sitemap.xml
