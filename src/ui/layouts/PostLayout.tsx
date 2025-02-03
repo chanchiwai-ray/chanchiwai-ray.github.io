@@ -84,18 +84,18 @@ export default function PostLayout({
                         <dd className="text-gray-900 dark:text-gray-100">{author.name}</dd>
                         <dt className="sr-only">Linkedin and GitHub</dt>
                         <dd>
-                          {author.linkedin && (
+                          {author.linkedin?.link && (
                             <Link
-                              href={author.linkedin}
+                              href={author.linkedin.link}
                               className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                             >
                               @Linkedin
                             </Link>
                           )}
                           <span> </span>
-                          {author.github && (
+                          {author.github?.link && (
                             <Link
-                              href={author.github}
+                              href={author.github.link}
                               className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                             >
                               @Github

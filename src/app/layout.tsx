@@ -1,6 +1,8 @@
+import { Authors, allAuthors } from "contentlayer/generated"
 import { Analytics, AnalyticsConfig } from "pliny/analytics"
 import { SearchConfig, SearchProvider } from "pliny/search"
 import "pliny/search/algolia.css"
+import { coreContent } from "pliny/utils/contentlayer"
 import "remark-github-blockquote-alert/alert.css"
 
 import { Metadata } from "next"
@@ -13,18 +15,6 @@ import Header from "@/ui/components/Header"
 import SectionContainer from "@/ui/components/SectionContainer"
 import "@/ui/css/tailwind.css"
 
-const ListOfSocialIconProps = [
-  { kind: "mail", href: `mailto:${siteMetadata.email}`, size: 6 },
-  { kind: "github", href: siteMetadata.github, size: 6 },
-  { kind: "facebook", href: siteMetadata.facebook, size: 6 },
-  { kind: "youtube", href: siteMetadata.youtube, size: 6 },
-  { kind: "linkedin", href: siteMetadata.linkedin, size: 6 },
-  { kind: "bluesky", href: siteMetadata.bluesky, size: 6 },
-  { kind: "x", href: siteMetadata.x, size: 6 },
-  { kind: "instagram", href: siteMetadata.instagram, size: 6 },
-  { kind: "threads", href: siteMetadata.threads, size: 6 },
-  { kind: "medium", href: siteMetadata.medium, size: 6 },
-]
 const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
@@ -72,6 +62,8 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const author = allAuthors.find((p) => p.slug === "default") as Authors
+  const authorInfo = coreContent(author)
   const basePath = process.env.BASE_PATH || ""
 
   return (
@@ -103,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
               <main className="mb-auto">{children}</main>
             </SearchProvider>
-            <Footer author={siteMetadata.author} ListOfSocialIconProps={ListOfSocialIconProps} />
+            <Footer siteRepo={siteMetadata.siteRepo} content={authorInfo} />
           </SectionContainer>
         </ThemeProviders>
       </body>

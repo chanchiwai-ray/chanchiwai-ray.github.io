@@ -1,18 +1,14 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
   title: "Ray's Blog",
-  author: "Chi Wai CHAN",
   headerTitle: "Ray's Blog",
   description: "",
   language: "en-us",
   theme: "system", // system, dark or light
-  siteUrl: "https://github.com/chanchiwai-ray/chanchiwai-ray.github.io",
-  siteRepo: "https://github.com/chanchiwai-ray",
+  siteUrl: "https://chanchiwai-ray.github.io",
+  siteRepo: "https://github.com/chanchiwai-ray/chanchiwai-ray.github.io",
   siteLogo: `${process.env.BASE_PATH || ""}/static/images/logo.png`,
   socialBanner: `${process.env.BASE_PATH || ""}/static/images/x-card.png`,
-  email: "chanchiwairay@gmail.com",
-  github: "https://github.com/chanchiwai-ray",
-  linkedin: "https://www.linkedin.com/in/chi-wai-chan-ba5870137/",
   locale: "en-US",
   stickyNav: true,
   image: "",
