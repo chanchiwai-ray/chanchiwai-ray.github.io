@@ -54,20 +54,3 @@ jobs:
         with:
           name: exported-build
           path: out/
-
-  debug:
-    name: Debug
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout to repository
-        uses: actions/checkout@v4
-      - name: Download exported static website
-        uses: actions/download-artifact@v4
-        with:
-          name: exported-build
-          path: ./out
-      - name: Debug
-        run: |
-          ls -l .
-          ls -l ./out
-          file ./out
