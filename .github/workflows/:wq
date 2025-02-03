@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  EXPORT: 1
-  UNOPTIMIZED: 1
+  EXPORT: export
+  UNOPTIMIZED: true
 
 jobs:
   lint:

@@ -32,6 +32,7 @@ module.exports = () => {
     pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
     eslint: {
       dirs: ["src", "data"],
+      ignoreDuringBuilds: true,
     },
     images: {
       remotePatterns: [

@@ -14,28 +14,18 @@ jobs:
     uses: ./.github/workflows/check.yaml
 
   deploy:
+    needs: check
     name: GitHub page
     runs-on: ubuntu-24.04
-    environment:
-      EXPORT: "export"
-      UNOPTIMIZED: true
     steps:
       - name: Checkout to repository
         uses: actions/checkout@v4
-      - name: Setup latest NodeJS
-        uses: actions/setup-node@v4
-      - name: Cache dependencies
-        uses: actions/cache@v2
+      - name: Download exported static website
+        uses: actions/download-artifact@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Build and export the static site
-        run: |
-          npm install
-          npm run build
-      - name: Deploy the static site
+          name: exported-build
+          path: ./
+      - name: Deploy the static website to GitHub
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
