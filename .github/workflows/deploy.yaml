@@ -26,6 +26,9 @@ jobs:
         with:
           name: exported-build
           path: ./
+      - name: Unzip build
+        run: |
+          unzip ./exported-build -d ./out
       - name: Deploy the static website to GitHub
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}
