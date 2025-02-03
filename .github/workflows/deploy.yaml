@@ -25,9 +25,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: exported-build
+          path: ./out
       - name: Debug
         run: |
-          ls -l ./out
+          ls -l .
           file ./out
       - name: Deploy the static website to GitHub
         uses: peaceiris/actions-gh-pages@v4
