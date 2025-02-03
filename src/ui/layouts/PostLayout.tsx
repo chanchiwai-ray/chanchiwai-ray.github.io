@@ -38,8 +38,6 @@ export default function PostLayout({
   const { filePath, path, slug, date, title, tags } = content
   const basePath = path.split("/")[0]
   const editUrl = (path: string) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
-  const discussUrl = (path: string) =>
-    `https://mobile.x.com/search?q=${encodeURIComponent(`${siteMetadata.siteUrl}/${path}`)}`
 
   return (
     <SectionContainer>
