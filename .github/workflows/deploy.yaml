@@ -25,10 +25,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: exported-build
-          path: ./out
+          path: ./website/out
       - name: Deploy the static website to GitHub
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
+          publish_dir: ./website/out

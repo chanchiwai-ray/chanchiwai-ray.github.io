@@ -28,10 +28,10 @@ jobs:
           cache: "npm"
       - name: Install project
         run: |
-          npm install
+          cd website && npm install
       - name: Run lint
         run: |
-          npm run lint
+          cd website && npm run lint
 
   build:
     name: Build
@@ -45,12 +45,12 @@ jobs:
           cache: "npm"
       - name: Install project
         run: |
-          npm install
+          cd website && npm install
       - name: Test build
         run: |
-          npm run build
+          cd website && npm run build
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
           name: exported-build
-          path: out/
+          path: ./website/out/
