@@ -1,0 +1,67 @@
+#!/usr/bin/bash
+
+set -e
+
+function decrypt() {
+    data_path=$1
+    output_file=$2
+
+    if [ $# -ne 2 ]; then
+        echo "Error: Need to provide DATA_PATH, OUTPUT_FILE"
+        echo "Usage: $0 <DATA_PATH> <OUTPUT_FILE>"
+        exit 1
+    fi
+
+    if [ -z "$data_path" ] || [ -z "$output_file" ]; then
+        echo "Error: Both arguments must be non-empty."
+        echo "Usage: $0 <DATA_PATH> <OUTPUT_FILE>"
+        exit 1
+    fi
+
+    sops decrypt $data_path > $output_file
+}
+
+function compile_resume_pdf() {
+    input=$1
+    resume_path=$2
+
+    if [ $# -ne 2 ] || [ -z "$input" ] || [ -z "$resume_path" ] ; then
+        echo "Error: Need to provide non-empty INPUT and RESUME_PATH"
+        echo "Usage: $0 <INPUT> <RESUME_PATH>"
+        exit 1
+    fi
+
+    pushd $resume_path && make DATA=$input && popd
+}
+
+
+function main() {
+    data_path=$1
+    resume_path=$2
+    website_path=$3
+
+    if [ $# -ne 3 ]; then
+        echo "Error: Need to provide DATA_PATH, RESUME_PATH, and WEBSITE_PATH"
+        echo "Usage: $0 <DATA_PATH> <RESUME_PATH> <WEBSITE_PATH>"
+        exit 1
+    fi
+
+    if [ -z "$data_path" ] || [ -z "$resume_path" ] || [ -z "$website_path" ]; then
+        echo "Error: All arguments must be non-empty."
+        echo "Usage: $0 <DATA_PATH> <RESUME_PATH> <WEBSITE_PATH>"
+        exit 1
+    fi
+
+    decrypted_data_path=data.dec.yaml
+    extracted_resume_data_input=$resume_path/$decrypted_data
+    extracted_website_data_input=$website_path/artifacts/$decrypted_data
+
+    pushd $resume_path && source $(poetry env info --path)/bin/activate && popd
+    decrypt $data_path $decrypted_data_path
+    compile_resume_pdf ../$decrypted_data_path $resume_path
+
+    mkdir -p $website_path/public/static/files
+    cp $resume_path/build/resume.pdf $website_path/public/static/files
+}
+
+main $@

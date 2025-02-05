@@ -1,11 +1,13 @@
 """Command interface for parsing personal documents."""
 
+import sys
 from importlib import resources
 
-import sys
 import click
-import yaml
+import pydantic_yaml
 from jinja2 import Environment, FileSystemLoader
+
+from app.model import Model
 
 TEMPLATE_DIR = "templates"
 RESUME = "resume.tex"
@@ -32,7 +34,8 @@ def resume(ctx: click.Context, file: str) -> None:
     env = ctx.obj["env"]
     try:
         with open(RESUME, "w") as f, open(file, "r") as data:
-            template = env.get_template(RESUME).render(data=yaml.safe_load(data))
+            m = pydantic_yaml.parse_yaml_raw_as(Model, data.read().strip())
+            template = env.get_template(RESUME).render(data=m.model_dump())
             f.write(template)
     except FileNotFoundError as e:
         print(e)

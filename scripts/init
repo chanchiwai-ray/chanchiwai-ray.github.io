@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+
+set -xe
+
+function init_resume() {
+    resume_path=$1
+
+    if [ $# -ne 1 ] || [ -z "$resume_path" ] ; then
+        echo "Error: Need to provide non-empty RESUME_PATH"
+        echo "Usage: $0 <RESUME_PATH>"
+        exit 1
+    fi
+
+    pushd $resume_path && make init && popd
+}
+
+function init_website() {
+    website_path=$1
+
+    if [ $# -ne 1 ] || [ -z "$website_path" ] ; then
+        echo "Error: Need to provide non-empty WEBSITE_PATH"
+        echo "Usage: $0 <WEBSITE_PATH>"
+        exit 1
+    fi
+
+    pushd $website_path && npm install && popd
+}
+
+function main() {
+    resume_path=$1
+    website_path=$2
+
+    if [ $# -ne 2 ]; then
+        echo "Error: Need to provide RESUME_PATH and WEBSITE_PATH"
+        echo "Usage: $0 <RESUME_PATH> <WEBSITE_PATH>"
+        exit 1
+    fi
+
+    if [ -z "$resume_path" ] || [ -z "$website_path" ]; then
+        echo "Error: All arguments must be non-empty."
+        echo "Usage: $0 <RESUME_PATH> <WEBSITE_PATH>"
+        exit 1
+    fi
+
+    init_resume $resume_path
+    init_website $website_path
+}
+
+main $@

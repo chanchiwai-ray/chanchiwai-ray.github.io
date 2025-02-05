@@ -1,0 +1,12 @@
+- ubuntu 24.04
+- Install poetry
+- `sudo apt install pipx`
+- `pipx install poerty
+- Download SOPS from https://getsops.io/docs/#stable-release
+- Download age from https://github.com/FiloSottile/age
+- Create directory to store age key (e.g. `$HOME/.sops`)
+- Generate age key `age-keygen -o $HOME/.sops/key.txt` (this file is only readable by current user)
+- Add environement variable so that SOPS automaically load the age key
+  - `export SOPS_AGE_KEY_FILE=$HOME/.sops/key.txt # age key file`
+  - `export SOPS_AGE_RECIPIENTS=<age-public-key> # age public key (recipient)`
+  - you should also put them into you `.bashrc` or some thing similar so that these environement variables are loaded automaically.

@@ -1,0 +1,15 @@
+#!/usr/bin/bash
+
+set -xe
+
+function main() {
+    data_path=$1
+    if [ -z "$data_path" ] ; then
+        echo "Error: Need to provide DATA_PATH to edit"
+        echo "Usage: $0 <DATA_PATH>"
+        exit 1
+    fi
+    sops edit $data_path || true
+}
+
+main $@

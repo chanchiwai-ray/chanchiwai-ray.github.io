@@ -121,7 +121,7 @@
 {% endif -%}
 
 
-{% if "experiences" in data -%}
+{% if "experiences" in data and data.experiences -%}
 \separator  %-----------EXPERIENCE-----------
 
 
@@ -143,7 +143,7 @@
 {% endif -%}
 
 
-{% if "projects" in data -%}
+{% if "projects" in data and data.projects -%}
 \separator %-----------PROJECTS-----------
 
 
@@ -165,7 +165,7 @@
 {% endif -%}
 
 
-{% if "educations" in data -%}
+{% if "educations" in data and data.educations -%}
 \separator %-----------EDUCATION-----------
 
 
