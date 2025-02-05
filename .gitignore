@@ -7,6 +7,11 @@ node_modules
 .vercel
 .contentlayer/
 
+# resume gitignore
+.mypy_cache
+.ruff_cache
+__pycache__/
+
 # builds
 out/
 build/
