@@ -1,0 +1,59 @@
+[
+    {
+        "name": "Personal website",
+        "description": "A personal website build with Nextjs and powered by github page (this site).",
+        "link": "https://github.com/chanchiwai-ray/chanchiwai-ray.github.io",
+        "image": "",
+        "technologies": [
+          "Github Page",
+          "ReactJS",
+          "Next.js",
+          "Tailwind CSS"
+        ]
+    },
+    {
+        "name": "Twitter clone",
+        "description": "A minimalist clone of Twitter built with Python and Flask.",
+        "link": "https://github.com/chanchiwai-ray/twitter-clone",
+        "image": "",
+        "technologies": [
+          "Google OAuth 2.0",
+          "MinIO",
+          "Nginx",
+          "Python",
+          "Redis"
+        ]
+    },
+    {
+        "name": "Personal dashboard",
+        "description": "A personal dashboard for managing personal data.",
+        "link": "https://github.com/chanchiwai-ray/dashboard",
+        "image": "",
+        "technologies": [
+          "Docker",
+          "ExpressJS",
+          "MongoDB",
+          "ReactJS"
+        ]
+    },
+    {
+        "name": "Google Drive CLI",
+        "link": "https://github.com/chanchiwai-ray/google-drive-cli",
+        "image": "",
+        "technologies": [
+          "Python",
+          "Google Drive API"
+        ],
+        "description": "A command line interface for Google Drive."
+    },
+    {
+        "name": "Background Estimation",
+        "link": "https://arxiv.org/abs/2009.03025",
+        "image": "",
+        "technologies": [
+          "Python",
+          "Gravitational Wave Data Analysis"
+        ],
+        "description": "Improving the background estimation technique in the GstLAL inspiral pipeline."
+    }
+]
