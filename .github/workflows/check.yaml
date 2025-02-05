@@ -26,12 +26,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
       - name: Install project
+        working-directory: ./website
         run: |
-          cd website && npm install
+          npm install
       - name: Run lint
+        working-directory: ./website
         run: |
-          cd website && npm run lint
+          npm run lint
 
   build:
     name: Build
@@ -43,14 +46,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
       - name: Install project
+        working-directory: ./website
         run: |
-          cd website && npm install
+          npm install
       - name: Test build
+        working-directory: ./website
         run: |
-          cd website && npm run build
+          npm run build
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
           name: exported-build
-          path: ./website/out/
+          path: ./website/out
