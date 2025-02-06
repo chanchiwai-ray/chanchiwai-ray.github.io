@@ -4,7 +4,7 @@ import { allCoreContent, sortPosts } from "pliny/utils/contentlayer"
 import { notFound } from "next/navigation"
 
 import siteMetadata from "@/data/siteMetadata"
-import ListLayout from "@/ui/layouts/ListLayoutWithTags"
+import ListLayoutWithTags from "@/ui/layouts/ListLayoutWithTags"
 
 const POSTS_PER_PAGE = 5
 
@@ -35,7 +35,7 @@ export default async function Page(props: { params: Promise<{ page: string }> })
   }
 
   return (
-    <ListLayout
+    <ListLayoutWithTags
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
