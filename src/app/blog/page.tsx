@@ -3,7 +3,8 @@ import { allCoreContent, sortPosts } from "pliny/utils/contentlayer"
 
 import { genPageMetadata } from "@/app/seo"
 import siteMetadata from "@/data/siteMetadata"
-import ListLayout from "@/ui/layouts/ListLayoutWithTags"
+import BlogLayout from "@/ui/layouts/BlogLayout"
+import ListLayoutWithTags from "@/ui/layouts/ListLayoutWithTags"
 
 const POSTS_PER_PAGE = 5
 
@@ -20,12 +21,14 @@ export default async function BlogPage() {
   }
 
   return (
-    <ListLayout
-      posts={posts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
-      title="All Posts"
-      siteMetadata={siteMetadata}
-    />
+    <BlogLayout>
+      <ListLayoutWithTags
+        posts={posts}
+        initialDisplayPosts={initialDisplayPosts}
+        pagination={pagination}
+        title="All Posts"
+        siteMetadata={siteMetadata}
+      />
+    </BlogLayout>
   )
 }
