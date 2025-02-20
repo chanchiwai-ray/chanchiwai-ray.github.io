@@ -1,8 +1,8 @@
 import type { Authors } from "contentlayer/generated"
 import { ReactNode } from "react"
 
+import projects from "@/data/projects"
 import Image from "@/ui/components/Image"
-import { SocialIcon } from "@/ui/components/SocialIcon"
 
 interface Props {
   children: ReactNode
@@ -16,11 +16,14 @@ export default function AuthorLayout({ children, content }: Props) {
   const company = content.company
   const occupation = content.occupation
   const location = content.location
-  // social networks
-  const x = content.x?.link || ""
-  const email = `mailto:${content?.email || ""}`
-  const github = content.github?.link || ""
-  const linkedin = content.linkedin?.link || ""
+  // all technologies
+  const techs: Map<string, number> = new Map()
+  for (const project of projects) {
+    for (const t of project.technologies) {
+      techs.set(t, (techs.get(t) || 0) + 1)
+    }
+  }
+
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -38,11 +41,16 @@ export default function AuthorLayout({ children, content }: Props) {
             <div className="text-gray-500 dark:text-gray-400">{occupation}</div>
             <div className="text-gray-500 dark:text-gray-400">{company}</div>
             <div className="text-gray-500 dark:text-gray-400">{location}</div>
-            <div className="flex space-x-3 pt-6">
-              <SocialIcon kind="x" href={x} />
-              <SocialIcon kind="mail" href={email} />
-              <SocialIcon kind="github" href={github} />
-              <SocialIcon kind="linkedin" href={linkedin} />
+            <div className="py-3"></div>
+            <div className="flex flex-row flex-wrap">
+              {Array.from(techs).map((t) => (
+                <div
+                  key={t[0].replace(" ", "-")}
+                  className="rounded-md shadow-md flex-grow p-0.5 m-1 border border-sky-500 dark:border-indigo-400/50 text-center text-gray-500 dark:text-gray-400 text-xs"
+                >
+                  {t[0]}
+                </div>
+              ))}
             </div>
           </div>
           <div className="prose max-w-none pb-8 pt-8 dark:prose-invert xl:col-span-2">
