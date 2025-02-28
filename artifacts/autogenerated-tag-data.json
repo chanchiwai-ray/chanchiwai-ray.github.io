@@ -1,3 +1,5 @@
 {
+  "ceph": 1,
+  "lxd": 1,
   "hello-world": 1
 }

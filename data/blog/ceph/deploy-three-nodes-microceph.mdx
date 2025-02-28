@@ -1,0 +1,323 @@
+---
+title: "Setting Up Ceph Cluster with MicroCeph"
+date: "2025-02-28"
+tags: ["ceph", "lxd"]
+draft: false
+summary: Learning Ceph can sometimes be difficult due the resources required to set up a Ceph cluster. In this post, I am going demonstrate how you can set up a Ceph cluster on your laptop.
+---
+
+## 🌟 Introduction
+
+Learning Ceph can sometimes be difficult due the [resources][ceph-resource] required to set up a Ceph cluster. However,
+thanks to creation of [LXD][lxd] and [MicroCeph][microceph], we now have a way to create multi-node Ceph cluster with
+limited resources.
+
+In this post, I am going to show you how to set up a Ceph cluster on you local desktop or laptop for **testing or
+learning** purpose.
+
+> [!WARNING]
+> Do not use it for production! This is not a tutorial for setting up a production grade Ceph cluster!
+
+<TOCInline toc={props.toc} exclude="Introduction" />
+
+## 🪨 Prerequisite
+
+Before you continue with the tutorial, please make sure that you have met the following software or hardware
+requirements. You can follow the link to install and initialize the software required for this tutorial.
+
+- [LXD][lxd]
+- About 8 vCPUs
+- About 8 GiB of RAMs
+- (optional) Some additional disk(s) on the host
+
+The hardware requirements are not strict, you should still be able to complete the deployment with a less powerful
+machine. Also, you don't necessarily need to have additional disks If you have enough storage for the host.
+
+## 🚀 Getting Started
+
+The tutorial will set up 3 LXD VMs with one root disk and one extra disk, and each disk will have 10 GiB of storage.
+Each VMs will need 2 vCPUs and 2 GiB of RAMs.
+
+- microceph-1
+  - 1 root disk of 10 GiB
+  - 1 extra disk of 10 GiB
+  - 2 vCPUs
+  - 2 GiB of RAMs
+- microceph-2
+  - 1 root disk of 10 GiB
+  - 1 extra disk of 10 GiB
+  - 2 vCPUs
+  - 2 GiB of RAMs
+- microceph-3
+  - 1 root disk of 10 GiB
+  - 1 extra disk of 10 GiB
+  - 2 vCPUs
+  - 2 GiB of RAMs
+
+### 💿 Create block storage
+
+First, we need to create the extra disks for each VMs.
+
+```shell
+for i in 1 2 3
+do
+  lxc storage volume create default --type block microceph-volume-$i size=10GiB
+done
+```
+
+This creates 3 block devices on the `default` storage pool, and each block device has a size of 10 GiB.
+
+> [!NOTE]
+> If you are using an extra disk, you can configure a storage pool on that extra disk, and create volumes on that
+> storage pool. For more information, see https://documentation.ubuntu.com/lxd/en/latest/howto/storage_pools.
+
+
+To verify if the block devices have been created, run
+
+```shell
+$ lxc storage volume list
++---------+-----------+--------------------+-------------+--------------+---------+
+|  POOL   |   TYPE    |        NAME        | DESCRIPTION | CONTENT-TYPE | USED BY |
++---------+-----------+--------------------+-------------+--------------+---------+
+| default | custom    | microceph-volume-1 |             | block        | 0       |
++---------+-----------+--------------------+-------------+--------------+---------+
+| default | custom    | microceph-volume-2 |             | block        | 0       |
++---------+-----------+--------------------+-------------+--------------+---------+
+| default | custom    | microceph-volume-3 |             | block        | 0       |
++---------+-----------+--------------------+-------------+--------------+---------+
+```
+
+, and you should see something like that.
+
+### 💻 Create LXD virtual machines
+
+Next, we need to create 3 LXD VMs.
+
+```shell
+for i in 1 2 3
+do
+  lxc launch ubuntu:24.04 microceph-$i --vm -c limits.cpu=2 -c limits.memory=2GiB -d root,size=10GiB
+done
+```
+
+This creates 3 Ubuntu@24.04 LXD VMs with 2 cpus, 2 GiB of memory, and a root disk of 10GiB. You can adjust the number of
+cpu, memory, and disks depending on the resources you have.
+
+To verify if the VMs have been created, run
+
+```shell
+$ lxc list
++---------------+---------+-----------------------+------+-----------------+-----------+
+|     NAME      |  STATE  |         IPV4          | IPV6 |      TYPE       | SNAPSHOTS |
++---------------+---------+-----------------------+------+-----------------+-----------+
+| microceph-1   | RUNNING | 10.42.75.215 (enp5s0) |      | VIRTUAL-MACHINE | 0         |
++---------------+---------+-----------------------+------+-----------------+-----------+
+| microceph-2   | RUNNING | 10.42.75.5 (enp5s0)   |      | VIRTUAL-MACHINE | 0         |
++---------------+---------+-----------------------+------+-----------------+-----------+
+| microceph-3   | RUNNING | 10.42.75.75 (enp5s0)  |      | VIRTUAL-MACHINE | 0         |
++---------------+---------+-----------------------+------+-----------------+-----------+
+```
+
+, and you see something like that.
+
+### 🔗 Attach volume (disk) to LXD virtual machines
+
+Next, we need to attach the volumes to the virtual machines, so that the virtual machines have one extra disk for the
+OSD.
+
+```shell
+for i in 1 2 3
+do
+  lxc storage volume attach default microceph-volume-$i microceph-$i
+done
+```
+
+To verify if the VM has one extra disk, run
+
+```text
+$ lxc exec microceph-1 -- lsblk
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda       8:0    0   10G  0 disk
+├─sda1    8:1    0    9G  0 part /
+├─sda14   8:14   0    4M  0 part
+├─sda15   8:15   0  106M  0 part /boot/efi
+└─sda16 259:0    0  913M  0 part /boot
+sdb       8:16   0   10G  0 disk
+```
+
+. This will run a `lsblk` command on node `microceph-1`. Note that `/dev/sdb` is the attached volume. You can verify the
+disk on the other nodes by repeating the same command.
+
+### 🌎 Install MicroCeph
+
+Next, we need to install MicroCeph on each node.
+
+```shell
+for i in 1 2 3
+do
+  lxc exec microceph-$i -- snap install microceph --channel squid/stable
+done
+```
+
+This will install MicroCeph from `squid/stable` channel on each node.
+
+### 👢 Bootstrap MicroCeph cluster
+
+> [!NOTE]
+> You can use `lxc exec <node-name> -- su ubuntu` to login to each node as `ubuntu` user
+
+On node `microceph-1`, initialize the MicroCeph cluster by running:
+
+```shell
+sudo microceph cluster bootstrap
+```
+
+Then, generate the registration tokens for `microceph-2` and `microceph-3` by running the following commands:
+
+```shell
+sudo microceph cluster add microceph-2
+eyJzZWNyZXQiOiJjYzhhZWFlM2NiN2JiM2JjM2VmZTg4MzNjZTA1YTgxMjcxZDg3MjdhZGZhZWExZGZiNmE4MzA3MDdhNzNiYzhlIiwiZmluZ2VycHJpbnQiOiI5YWE5MDljMTY3MjM2ZmI4OGU3NmI4OWRlN2NjYTRhNzc5OTQwOWNkZDE1MzgxMGQzMjJmYzFiNjE1OTdiODU4Iiwiam9pbl9hZGRyZXNzZXMiOlsiMTAuNDIuNzUuMjE1Ojc0NDMiXX0=
+
+sudo microceph cluster add microceph-3
+eyJzZWNyZXQiOiJiMDFiZTAxZjFkOTVlN2JmOWMwYTM1Mzg2ZWQ1ZTg2NzMxNzdhYTRhYzlkYzQ5N2Q0MmI2NTNkNzRmOTczNTg1IiwiZmluZ2VycHJpbnQiOiI5YWE5MDljMTY3MjM2ZmI4OGU3NmI4OWRlN2NjYTRhNzc5OTQwOWNkZDE1MzgxMGQzMjJmYzFiNjE1OTdiODU4Iiwiam9pbl9hZGRyZXNzZXMiOlsiMTAuNDIuNzUuMjE1Ojc0NDMiXX0=
+```
+
+Next, you can add node `microceph-2` and `microceph-3` to the cluster using the registration tokens.
+
+On `microceph-2`, add the node to the cluster by running:
+
+```shell
+sudo microceph cluster join eyJzZWNyZXQiOiJjYzhhZWFlM2NiN2JiM2JjM2VmZTg4MzNjZTA1YTgxMjcxZDg3MjdhZGZhZWExZGZiNmE4MzA3MDdhNzNiYzhlIiwiZmluZ2VycHJpbnQiOiI5YWE5MDljMTY3MjM2ZmI4OGU3NmI4OWRlN2NjYTRhNzc5OTQwOWNkZDE1MzgxMGQzMjJmYzFiNjE1OTdiODU4Iiwiam9pbl9hZGRyZXNzZXMiOlsiMTAuNDIuNzUuMjE1Ojc0NDMiXX0=
+```
+
+On `microceph-3`, add the node to the cluster by running:
+
+```shell
+sudo microceph cluster join eyJzZWNyZXQiOiJiMDFiZTAxZjFkOTVlN2JmOWMwYTM1Mzg2ZWQ1ZTg2NzMxNzdhYTRhYzlkYzQ5N2Q0MmI2NTNkNzRmOTczNTg1IiwiZmluZ2VycHJpbnQiOiI5YWE5MDljMTY3MjM2ZmI4OGU3NmI4OWRlN2NjYTRhNzc5OTQwOWNkZDE1MzgxMGQzMjJmYzFiNjE1OTdiODU4Iiwiam9pbl9hZGRyZXNzZXMiOlsiMTAuNDIuNzUuMjE1Ojc0NDMiXX0=
+```
+
+### 💽 Add disks to MicroCeph cluster
+
+Initially, the MicroCeph cluster is bootstrapped without disks (i.e. no OSDs), you will need to add the free disk that we
+have attached in the [previous step](#attach-volume-disk-to-lxd-virtual-machines)
+
+On each of the nodes `microceph-1`, `microceph-2`, and `microceph-3`, run
+
+```shell
+sudo microceph disk add /dev/sdb --wipe  # Note, you might need to change the device name if you have a different device name
+```
+
+. This will configure the device `/dev/sdb` to be the OSD, and wipe all the data on that device. (Note, it is safe to
+wipe the device since you've just created it, but if you are reusing volumes from other projects, please make sure to
+backup the data.)
+
+### 💡 Check the status of MicroCeph cluster
+
+Finally, we've deployed the MicroCeph cluster, and you can now verify the deployment status using `microceph` command.
+
+On **any** of the nodes `microceph-1`, `microceph-2`, and `microceph-3`, run
+
+```shell
+sudo microceph status
+```
+
+This will show you the status of the MicroCeph cluster, and you should see something like this:
+
+```text
+MicroCeph deployment summary:
+- microceph-1 (10.42.75.215)
+  Services: mds, mgr, mon, osd
+  Disks: 1
+- microceph-2 (10.42.75.5)
+  Services: mds, mgr, mon, osd
+  Disks: 1
+- microceph-3 (10.42.75.75)
+  Services: mds, mgr, mon, osd
+  Disks: 1
+```
+
+### 🧙 Manage the MicroCeph cluster
+
+You can manage the cluster with the `ceph` tool itself. MicroCeph also have a subcommand to access the `ceph` tool.
+
+On **any** of the node `microceph-1`, `microceph-2`, and `microceph-3`, run
+
+```shell
+sudo microceph.ceph -s
+```
+
+This will show you the status of the Ceph cluster, and you should see something like this:
+
+```text
+$ sudo microceph.ceph -s
+  cluster:
+    id:     c2a1abab-bfb7-4683-a14b-93713d75fc99
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum microceph-1,microceph-2,microceph-3 (age 24m)
+    mgr: microceph-1(active, since 38m), standbys: microceph-2, microceph-3
+    osd: 3 osds: 3 up (since 11m), 3 in (since 11m)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 2 objects, 577 KiB
+    usage:   83 MiB used, 30 GiB / 30 GiB avail
+    pgs:     1 active+clean
+```
+
+Alternatively, you can also manage the cluster from your host machine. To do that, you will need to copy the `ceph.conf`
+and `ceph.keyring` to the host machine.
+
+On the host machine, run
+
+```shell
+lxc file pull microceph-1/var/snap/microceph/current/conf/ceph.keyring ~/
+lxc file pull microceph-1/var/snap/microceph/current/conf/ceph.conf ~/
+```
+
+, to copy the Ceph config file and keyring to the host machine.
+
+On the host machine, run
+
+```shell
+sudo apt install ceph-common
+```
+, to install `ceph-common` (if you have not installed it) to use the `ceph` CLIs.
+
+Now, you can manage the cluster using the `ceph.keyring` and `ceph.conf`.
+
+```shell
+sudo ceph -s -k ~/ceph.keyring -c ~/ceph.conf
+```
+
+## 🧹 Clean up resources
+
+When you are finished with the testing or learning, you can remove all the resources.
+
+On the host, run
+
+```shell
+for i in 1 2 3
+do
+  lxc delete --force microceph-$i
+  lxc storage volume delete default microceph-volume-$i
+done
+```
+
+If you also installed `ceph-common`, you can remove it as well.
+
+```shell
+sudo apt remove ceph-common --purge
+sudo apt autoremove  # remove the dependency of ceph-common
+```
+
+---
+
+🚀 That's all for now folks! Hope you enjoy learning Ceph!
+
+
+[ceph-resource]: https://docs.ceph.com/en/latest/start/hardware-recommendations/#minimum-hardware-recommendations
+[lxd]: https://documentation.ubuntu.com/lxd/en/latest/
+[ceph]: https://docs.ceph.com/en/latest/start/
+[microceph]: https://canonical-microceph.readthedocs-hosted.com/en/latest/
