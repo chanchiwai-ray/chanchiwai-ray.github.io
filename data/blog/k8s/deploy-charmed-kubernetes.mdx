@@ -1,0 +1,433 @@
+---
+title: "Setting Up Kubernetes Cluster with Canonical Kubernetes"
+date: "2025-03-30"
+tags: ["kubernetes", "juju", "lxd", "terraform"]
+draft: false
+summary: There many ways to set up Kubernetes cluster for learning purpose, such as minikube or MicroK8s. In this post, I would like to introduce yet another way to deploy Kubernetes cluster with Canoincal K8s.
+---
+
+## 🌟 Introduction
+
+Distributions like minikube and MicroK8s are great for setting up a local Kubernetes for testing and learning. If you
+need anything more than a testing environment (maybe a cluster for your homelab or a cluster for your small business),
+these option may not be great. [Canonical Kubernetes][canonical k8s] is another distribution which can be used to deploy
+multi-node Kubernetes cluster on premise or on the cloud, and it offers many [integrations][k8s integration] with other
+solutions such as OpenStack and Ceph.
+
+In this post, I am going to show you how to set up a three nodes Kubernetes cluster on you local desktop or laptop for
+**testing or learning** purpose. The tutorial uses [LXD][lxd] as the cloud substrate for the nodes, but you can also use
+other [cloud substrates][juju clouds] as well.
+
+> [!WARNING]
+> Do not use it for production! This is not a tutorial for setting up a production grade Kubernetes cluster!
+
+<TOCInline toc={props.toc} exclude="Introduction" />
+
+## 🪨 Prerequisite
+
+Before you continue with the tutorial, please make sure that you have met the following software or hardware
+requirements. You can follow the link to install and initialize the software required for this tutorial.
+
+- [LXD][lxd]
+- [Juju][juju]
+- [Terraform][terraform]
+- About 6 CPUs (not a strict requirements)
+- About 12 GiB of RAMs (not a strict requirements)
+- About 100 GiB of storage (not a strict requirements)
+
+These are not a hard requirements. Depending on the workloads, you should still be able to complete the deployment with
+a less powerful machine.
+
+> [!NOTE]
+> The reason for using Juju and Terraform is for reproducibility. As a testing environment, you may change you setup
+> frequently. Using terraform allows you to easily re-deploy the same environment with all the necessary addons.
+
+## 🚀 Getting Started
+
+> [!TIP]
+> If you simply want to try out the Kubernetes cluster, you can go to my infrastructure repository:
+> https://github.com/chanchiwai-ray/infrastructure/tree/main/deployments/testing-ha/k8s-juju-lxd.
+
+We will be using the [Terraform Juju provider][terraform-juju-provider] to deploy three nodes Kubernetes cluster at
+version 1.32. One of the served as both worker and control plane node, the remaining two will be the worker nodes. The
+spec of virtual machines are listed below:
+
+- k8s/0
+  - 2 vCPUs
+  - 4 GiB of RAMs
+  - 1 root disk of 20 GiB
+- k8s-worker/0
+  - 2 vCPUs
+  - 4 GiB of RAMs
+  - 1 root disk of 40 GiB
+- k8s-worker/1
+  - 2 vCPUs
+  - 4 GiB of RAMs
+  - 1 root disk of 40 GiB
+
+### 📑 Terraform plan
+
+The first thing in the terraform plan is the `terraform` block. We will specify the provider as Terraform Juju provider.
+Then, we need to create a [Juju model][juju-model] called `k8s` on the cloud `localhost` in `localhost` region.
+
+```terraform
+# main.tf
+
+# Use Terraform Juju provider
+terraform {
+  required_providers {
+    juju = {
+      version = "~> 0.17.0"
+      source  = "juju/juju"
+    }
+  }
+}
+
+# Create a Juju model
+resource "juju_model" "k8s_model" {
+  name = "k8s"
+
+  # In my case, they are both `localhost`.
+  # You can check yours using `juju clouds` and `juju regions`.
+  cloud {
+    name   = "localhost"
+    region = "localhost"
+  }
+}
+```
+
+---
+
+Next, we will create one unit of the control plane node (also used as a worker, but you disabled it using `kubectl`
+later if required).
+
+```terraform
+# main.tf
+
+# ... some content from previous steps
+
+module "k8s" {
+  source = "git::https://github.com/canonical/k8s-operator//charms/worker/k8s/terraform?ref=main"
+
+  units = 1 # one control plane node
+  model = juju_model.k8s_model.name
+
+  base        = "ubuntu@24.04"
+  channel     = "1.32/stable"
+  constraints = "arch=amd64 cores=2 mem=4096M root-disk=20480M virt-type=virtual-machine"
+
+  config = {
+    load-balancer-enabled = true                        # enable load balancer feature
+    load-balancer-cidrs   = "10.42.75.200-10.42.75.200" # load balancer cidrs (placeholder, need update)
+    ingress-enabled       = true                        # enable ingress feature
+    local-storage-enabled = true                        # enable local hostpath storage
+  }
+}
+```
+
+Here, I am using a module from the upstream to simplify the terraform plan a little bit. For the module options, I set
+the version of Kubernetes to `1.32` and specify the constraints for the unit as `arch=amd64 cores=2 mem=4096M
+root-disk=20480M virt-type=virtual-machine`. If you want to use a different version of Kubernetes, or want to use less
+resources, you can adjust those values. However, note that the constraint for `virt-type=virtual-machine` is
+**required**, since the CNI used in Canonical Kubernetes (Cilium) cannot run inside unprivileged containers.
+
+If you are deploying a Kubernetes cluster for learning, it's general nice to have some built-in features such ingress
+controller and storage class configured. So, in the `config` block, I enable the load-balancer, ingress, and local
+storage features.
+
+---
+
+Next, we will add two units of the worker nodes.
+
+```terraform
+# main.tf
+
+# ... some content from previous steps
+
+module "k8s_worker" {
+  source = "git::https://github.com/canonical/k8s-operator//charms/worker/terraform?ref=main"
+
+  units = 2 # two worker nodes
+  model = juju_model.k8s_model.name
+
+  base        = "ubuntu@24.04"
+  channel     = "1.32/stable"
+  constraints = "arch=amd64 cores=2 mem=4096M root-disk=40960M virt-type=virtual-machine"
+
+  config = {}
+}
+```
+
+Here, the module options are pretty much the same as the control plane node, just a bit more storage `root-disk=40960M`
+and no extra configuration for the worker nodes.
+
+---
+
+Finally, the control plane node and the worker nodes need to form a cluster. To do that, we can use the [Juju
+integration][juju-relation], and it's a resource in Terraform Juju provider.
+
+```terraform
+# main.tf
+
+# ... some content from previous steps
+
+resource "juju_integration" "k8s_to_k8s_worker" {
+  model = juju_model.k8s_model.name
+
+  application {
+    name     = module.k8s.app_name
+    endpoint = "k8s-cluster"
+  }
+
+  application {
+    name     = module.k8s_worker.app_name
+    endpoint = "cluster"
+  }
+}
+```
+
+The Juju integration basically are some Python codes that handles the forming (or destruction) of Kubernetes cluster.
+
+### 🤝 Put it all together
+
+Below is the entire terraform plan for deploying three nodes Kubernetes cluster:
+
+```terraform
+# main.tf
+
+# Use Terraform Juju provider
+terraform {
+  required_providers {
+    juju = {
+      version = "~> 0.17.0"
+      source  = "juju/juju"
+    }
+  }
+}
+
+# Create a Juju model
+resource "juju_model" "k8s_model" {
+  name = "k8s"
+
+  # In my case, they are both `localhost`.
+  # You can check yours using `juju clouds` and `juju regions`.
+  cloud {
+    name   = "localhost"
+    region = "localhost"
+  }
+}
+
+module "k8s" {
+  source = "git::https://github.com/canonical/k8s-operator//charms/worker/k8s/terraform?ref=main"
+
+  units = 1 # one control plane node
+  model = juju_model.k8s_model.name
+
+  base        = "ubuntu@24.04"
+  channel     = "1.32/stable"
+  constraints = "arch=amd64 cores=2 mem=4096M root-disk=20480M virt-type=virtual-machine"
+
+  config = {
+    load-balancer-enabled = true                        # enable load balancer feature
+    load-balancer-cidrs   = "10.42.75.200-10.42.75.200" # load balancer cidrs (placeholder, need update)
+    ingress-enabled       = true                        # enable ingress feature
+    local-storage-enabled = true                        # enable local hostpath storage
+  }
+}
+
+module "k8s_worker" {
+  source = "git::https://github.com/canonical/k8s-operator//charms/worker/terraform?ref=main"
+
+  units = 2 # two worker nodes
+  model = juju_model.k8s_model.name
+
+  base        = "ubuntu@24.04"
+  channel     = "1.32/stable"
+  constraints = "arch=amd64 cores=2 mem=4096M root-disk=40960M virt-type=virtual-machine"
+
+  config = {}
+}
+
+resource "juju_integration" "k8s_to_k8s_worker" {
+  model = juju_model.k8s_model.name
+
+  application {
+    name     = module.k8s.app_name
+    endpoint = "k8s-cluster"
+  }
+
+  application {
+    name     = module.k8s_worker.app_name
+    endpoint = "cluster"
+  }
+}
+```
+
+### 💻 Deploy Kubernetes cluster
+
+In the directory with the terraform plan, and run the following commands:
+
+```shell
+terraform init
+terraform plan
+terraform apply
+```
+
+This will deploy the kubernetes cluster in the background. To monitor the deployment progress, run
+
+```shell
+juju status --watch 5s
+```
+
+When the deployment is completed, you should see something like this
+
+```text
+Model  Controller  Cloud/Region         Version  SLA          Timestamp
+k8s    overlord    localhost/localhost  3.6.3    unsupported  14:35:30+08:00
+
+App         Version  Status  Scale  Charm       Channel      Rev  Exposed  Message
+k8s         1.32.2   active      1  k8s         1.32/stable  458  yes      Ready
+k8s-worker  1.32.2   active      2  k8s-worker  1.32/stable  456  no       Ready
+
+Unit           Workload  Agent  Machine  Public address  Ports     Message
+k8s-worker/0*  active    idle   0        10.42.75.176              Ready
+k8s-worker/1   active    idle   1        10.42.75.227              Ready
+k8s/0*         active    idle   2        10.42.75.196    6443/tcp  Ready
+
+Machine  State    Address       Inst id        Base          AZ  Message
+0        started  10.42.75.176  juju-da35cc-0  ubuntu@24.04      Running
+1        started  10.42.75.227  juju-da35cc-1  ubuntu@24.04      Running
+2        started  10.42.75.196  juju-da35cc-2  ubuntu@24.04      Running
+```
+
+I mentioned earlier that the `load-balancer-cidrs` config option was just a placeholder. Now, we will update it the IP
+addresses of these nodes (because we don't have external load balancer so we will just use these nodes as "external"
+load balancer).
+
+```shell
+juju config k8s load-balancer-cidrs="10.42.75.176/32 10.42.75.227/32 10.42.75.196/32"
+```
+
+One of the IP will be used by Cilium to create a `cilium-ingress` service of `LoadBalancer` type (remember we enabled
+ingress feature), so you will only have two IPs for service of `LoadBalancer` type.
+
+For more information about ingress and load balancer in Canonical Kubernetes, see the
+[documentation][canonical-k8s-features].
+
+
+### 🧙 Manage the Kubernetes cluster
+
+To retrieve the kube config, run
+
+```shell
+mkdir -p $HOME/.kube/config
+
+if [ -e $HOME/.kube/config ]; then
+    mv $HOME/.kube/config $HOME/.kube/config.backup.$(date +%F)
+fi
+
+juju run k8s/0 get-kubeconfig | yq -r '.kubeconfig' >> $HOME/.kube/config
+```
+
+. The `get-kubeconfig` is an [Juju action][juju-action] defined in the k8s operator that returns the kube config in yaml
+format. We need to extract the `kubeconfig` key from the result, and place it in `$HOME/.kube/config`. In case you
+previously have the kube config, you can also back it up `mv $HOME/.kube/config $HOME/.kube/config.backup.$(date +%F)`.
+
+You can then use `kubectl` to manage the Kubernetes cluster. If you are on Ubuntu, you can use the `kubectl` snap.
+
+```shell
+sudo snap install kubectl --classic
+```
+
+Alternatively, you can install `kubectl` following the [official documentation][kubectl].
+
+### 💡 Check the status of Kubernetes cluster
+
+Finally, let's check what is in the Kubernetes cluster.
+
+
+**Nodes**
+
+```text
+$ kubectl get nodes
+NAME            STATUS   ROLES                  AGE   VERSION
+juju-da35cc-0   Ready    worker                 36m   v1.32.2
+juju-da35cc-1   Ready    worker                 35m   v1.32.2
+juju-da35cc-2   Ready    control-plane,worker   36m   v1.32.2
+```
+
+**Kube System**
+
+```text
+$ kubectl get -n kube-system all
+NAME                                      READY   STATUS    RESTARTS      AGE
+pod/cilium-58b8b                          1/1     Running   0             3h54m
+pod/cilium-d77pw                          1/1     Running   0             123m
+pod/cilium-gvs2f                          1/1     Running   0             123m
+pod/cilium-operator-85f5f9954b-82n7g      1/1     Running   1 (18m ago)   123m
+pod/ck-storage-rawfile-csi-controller-0   2/2     Running   0             3h55m
+pod/ck-storage-rawfile-csi-node-lptc2     4/4     Running   0             3h55m
+pod/ck-storage-rawfile-csi-node-rhshh     4/4     Running   0             3h55m
+pod/ck-storage-rawfile-csi-node-sf5b7     4/4     Running   0             3h55m
+pod/coredns-56d5ddcf86-lklvw              1/1     Running   0             3h55m
+pod/metrics-server-8694c96fb7-87fbm       1/1     Running   0             3h55m
+
+NAME                                        TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)                      AGE
+service/cilium-ingress                      LoadBalancer   10.152.183.250   10.42.75.176   80:30953/TCP,443:30265/TCP   123m
+service/ck-storage-rawfile-csi-controller   ClusterIP      None             <none>         <none>                       3h55m
+service/ck-storage-rawfile-csi-node         ClusterIP      10.152.183.254   <none>         9100/TCP                     3h55m
+service/coredns                             ClusterIP      10.152.183.177   <none>         53/UDP,53/TCP                3h55m
+service/hubble-peer                         ClusterIP      10.152.183.193   <none>         443/TCP                      3h55m
+service/metrics-server                      ClusterIP      10.152.183.219   <none>         443/TCP                      3h55m
+
+NAME                                         DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/cilium                        3         3         3       3            3           kubernetes.io/os=linux   3h55m
+daemonset.apps/ck-storage-rawfile-csi-node   3         3         3       3            3           <none>                   3h55m
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/cilium-operator   1/1     1            1           3h55m
+deployment.apps/coredns           1/1     1            1           3h55m
+deployment.apps/metrics-server    1/1     1            1           3h55m
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/cilium-operator-6978488575   0         0         0       3h55m
+replicaset.apps/cilium-operator-7c47596f76   0         0         0       3h54m
+replicaset.apps/cilium-operator-85f5f9954b   1         1         1       123m
+replicaset.apps/cilium-operator-85fb4b9ddf   0         0         0       3h55m
+replicaset.apps/coredns-56d5ddcf86           1         1         1       3h55m
+replicaset.apps/metrics-server-8694c96fb7    1         1         1       3h55m
+
+NAME                                                 READY   AGE
+statefulset.apps/ck-storage-rawfile-csi-controller   1/1     3h55m
+```
+
+There are ingress, local rawfile storage, and load balancer features because we enabled them during the
+deploymentbecause we enabled them during the deployment.
+
+## 🧹 Clean up resources
+
+When you are done with the testing, run
+
+```shell
+terraform apply -destroy
+```
+
+to clean up the resources.
+
+---
+
+🚀 That's all for now! Hope you enjoy learning Kubernetes!
+
+
+[lxd]: https://documentation.ubuntu.com/lxd/en/latest/
+[juju clouds]: https://documentation.ubuntu.com/juju/latest/user/reference/cloud/
+[canonical k8s]: https://ubuntu.com/kubernetes
+[k8s integration]: https://documentation.ubuntu.com/canonical-kubernetes/latest/charm/howto/#how-to-guides
+[juju]: https://juju.is/
+[terraform]: https://www.terraform.io/
+[terraform-juju-provider]: https://registry.terraform.io/providers/juju/juju/latest/docs
+[juju-model]: https://documentation.ubuntu.com/juju/latest/user/reference/model/
+[juju-relation]: https://documentation.ubuntu.com/juju/latest/user/reference/relation/
+[juju-action]: https://documentation.ubuntu.com/juju/latest/user/reference/action/
+[kubectl]: https://kubernetes.io/docs/tasks/tools/
+[canonical-k8s-features]: https://documentation.ubuntu.com/canonical-kubernetes/latest/charm/explanation/
