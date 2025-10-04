@@ -9,12 +9,20 @@ export interface Project {
 // Add new project from the top
 const projects: Project[] = [
   {
+    name: "Kafka",
+    link: "https://github.com/canonical/kafka-operator",
+    image: "",
+    technologies: ["Go", "Ceph", "Snap"],
+    description:
+      "Kafka operator is a charmed operator that deploys and operates Apache Kafka. I enhanced the observability of it by providing a modern Grafana dashboard, allowing users to monitor the health of a kafka cluster visually.",
+  },
+  {
     name: "MicroCeph",
     link: "https://github.com/canonical/microceph",
     image: "",
     technologies: ["Go", "Ceph", "Snap"],
     description:
-      "MicroCeph is snap-deployed Ceph with built-in clustering. I contributed the host maintenance feature to MicroCeph so that cloud operators can easily put any MicroCeph node into maintenance mode, and safely perform maintenance operations.",
+      "MicroCeph is a snap-deployed Ceph with built-in clustering. I contributed the host maintenance feature to MicroCeph so that cloud operators can easily put any MicroCeph node into maintenance mode, and safely perform maintenance operations.",
   },
   {
     name: "MicroCeph Charm",
@@ -86,7 +94,7 @@ const projects: Project[] = [
     image: "",
     technologies: ["Snap", "OpenStack", "Grafana", "Prometheus", "Loki"],
     description:
-      "Snap OpenStack is one of the core component of Sunbeam. I made several contribution to the sunbeam projects, including the observability feature and validation feature.",
+      "Snap OpenStack is one of the core component of Sunbeam. I made several contribution to the sunbeam projects, including the observability feature, validation feature, and maintenance feature.",
   },
   {
     name: "Snap OpenStack Hypervisor",
