@@ -9,6 +9,14 @@ export interface Project {
 // Add new project from the top
 const projects: Project[] = [
   {
+    name: "Falco",
+    link: "https://github.com/canonical/falco-operators",
+    image: "",
+    technologies: ["Falco", "Rock", "CI/CD", "Kubernetes", "Grafana"],
+    description:
+      "Falco operators are a collection of charmed operators that deploy and operate Falco and Falcosidekick. I implemented the charmed operators for Falco and Falcosidekick to monitor the security of OpenStack and Kubernetes cloud. I also created a Grafana dashboard for Falco to visualize the security events detected by Falco.",
+  },
+  {
     name: "Kafka",
     link: "https://github.com/canonical/kafka-operator",
     image: "",
