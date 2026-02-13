@@ -1,7 +1,10 @@
+"use client"
+
 import Link from "./Link"
 import { Authors } from "contentlayer/generated"
+import { useEffect, useState } from "react"
 
-import { SocialIcon } from "@/ui/components/SocialIcon"
+import { SocialIcon } from "@/components/SocialIcon"
 
 interface Props {
   siteRepo: string
@@ -9,6 +12,12 @@ interface Props {
 }
 
 export default function Footer({ siteRepo, content }: Props) {
+  const [year, setYear] = useState("")
+
+  useEffect(() => {
+    setYear(new Date().getFullYear().toString())
+  }, [])
+
   return (
     <footer>
       <div className="mt-16 flex flex-col items-center">
@@ -21,7 +30,7 @@ export default function Footer({ siteRepo, content }: Props) {
         <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
           <div>{content.name}</div>
           <div>{` • `}</div>
-          <div>{`© ${new Date().getFullYear()}`}</div>
+          <div>{year && `© ${year}`}</div>
           <div>{` • `}</div>
           <Link href={siteRepo + "/issues"}>Report Issues</Link>
         </div>

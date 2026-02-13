@@ -3,9 +3,9 @@ import NewsletterForm from "pliny/ui/NewsletterForm"
 import { allCoreContent, sortPosts } from "pliny/utils/contentlayer"
 import { formatDate } from "pliny/utils/formatDate"
 
-import siteMetadata from "@/data/siteMetadata"
-import Link from "@/ui/components/Link"
-import Tag from "@/ui/components/Tag"
+import siteMetadata from "@/lib/siteMetadata"
+import Link from "@/components/Link"
+import Tag from "@/components/Tag"
 
 const MAX_DISPLAY = 5
 

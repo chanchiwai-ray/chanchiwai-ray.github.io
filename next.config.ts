@@ -1,6 +1,8 @@
-const { withContentlayer } = require("next-contentlayer2")
+import { withContentlayer } from "next-contentlayer2"
+import bundleAnalyzer from "@next/bundle-analyzer"
+import type { NextConfig } from "next"
 
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 })
 
@@ -20,36 +22,50 @@ const output = process.env.EXPORT ? "export" : undefined
 const basePath = process.env.BASE_PATH || undefined
 const unoptimized = process.env.UNOPTIMIZED ? true : undefined
 
-/**
- * @type {import("next/dist/next-server/server/config").NextConfig}
- **/
-module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer]
-  return plugins.reduce((acc, next) => next(acc), {
-    output,
-    basePath,
-    reactStrictMode: true,
-    pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
-    eslint: {
-      dirs: ["src", "data"],
-      ignoreDuringBuilds: true,
-    },
-    images: {
-      remotePatterns: [
-        {
-          protocol: "https",
-          hostname: "picsum.photos",
-        },
-      ],
-      unoptimized,
-    },
-    webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ["@svgr/webpack"],
-      })
+const nextConfig: NextConfig = {
+  output,
+  basePath,
+  reactStrictMode: true,
+  pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
 
-      return config
+  // Next.js 16: Enable Cache Components (disabled in export mode)
+  cacheComponents: process.env.EXPORT ? false : true,
+
+  // Disable PPR for compatibility with static export
+  experimental: {
+    ppr: false,
+  },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+    ],
+    unoptimized,
+  },
+
+  // Turbopack configuration (Next.js 16 default)
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
     },
-  })
+  },
+
+  // Webpack configuration (fallback when using --webpack flag)
+  webpack: (config, options) => {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    })
+
+    return config
+  },
 }
+
+const plugins = [withContentlayer, withBundleAnalyzer]
+export default plugins.reduce((acc, next) => next(acc), nextConfig)

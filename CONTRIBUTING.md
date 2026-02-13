@@ -1,6 +1,6 @@
 # Contributing to Ray's Blog
 
-Thank you for your interest in contributing to this blog! This document provides guidelines and instructions for building, developing, and contributing to this project.
+Thank you for your interest in contributing to Ray's Blog! We welcome contributions of all kinds, from code improvements to documentation updates. This guide will help you get started.
 
 ## Table of Contents
 
@@ -8,8 +8,20 @@ Thank you for your interest in contributing to this blog! This document provides
 - [Project Structure](#project-structure)
 - [Development Workflow](#development-workflow)
 - [Writing Content](#writing-content)
-- [Code Style](#code-style)
-- [Submitting Changes](#submitting-changes)
+- [Coding Standards](#coding-standards)
+- [Pull Request Guidelines](#pull-request-guidelines)
+
+**What We Welcome:**
+
+- 🐛 **Bug Reports** - Report issues or unexpected behavior
+- ✨ **Features** - Suggest or implement new functionality
+- 📚 **Documentation** - Improve guides and instructions
+- 💻 **Code** - Fix bugs, add features, or improve performance
+- 🎨 **UI/UX** - Enhance design and user experience
+
+**Please Note:**
+
+- Security vulnerabilities should be reported via email, not GitHub Issues
 
 ## Getting Started
 
@@ -22,15 +34,19 @@ Thank you for your interest in contributing to this blog! This document provides
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/chanchiwai-ray/chanchiwai-ray.github.io.git
    cd chanchiwai-ray.github.io
    ```
 
 2. Install dependencies:
+
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
+
+   > **Note:** The `--legacy-peer-deps` flag is required due to React 19 compatibility with some dependencies (kbar, next-themes).
 
 3. Set up environment variables (optional):
    ```bash
@@ -41,34 +57,42 @@ Thank you for your interest in contributing to this blog! This document provides
 ### Development Commands
 
 - **Start development server:**
+
   ```bash
   npm run dev
   ```
+
   Opens at `http://localhost:3000` with hot-reload enabled.
 
 - **Build for production:**
+
   ```bash
   npm run build
   ```
+
   Generates optimized production build in `.next/` directory.
 
 - **Start production server:**
+
   ```bash
   npm run serve
   ```
+
   Runs the production build locally (must run `npm run build` first).
 
 - **Lint code:**
+
   ```bash
   npm run lint
   ```
-  Checks for code quality issues.
+
+  Runs ESLint to check for code quality issues. TypeScript and React best practices are enforced.
 
 - **Fix linting issues:**
   ```bash
   npm run lint:fix
   ```
-  Automatically fixes linting problems.
+  Automatically fixes linting problems where possible.
 
 ### Static Export (GitHub Pages)
 
@@ -78,162 +102,151 @@ To generate a static export for GitHub Pages:
 EXPORT=1 UNOPTIMIZED=1 npm run build
 ```
 
-This creates an `out/` directory with static HTML files.
+This creates an `out/` directory with static HTML files ready for deployment.
+
+> **Note:** Static export mode automatically disables certain Next.js features like Cache Components and PPR (Partial Prerendering) that are incompatible with static hosting.
+
+### Troubleshooting
+
+**Build cache issues:**
+If you encounter build errors, try clearing the cache:
+
+```bash
+rm -rf .next .contentlayer
+npm run build
+```
+
+**Dependency conflicts:**
+If `npm install` fails, ensure you're using the `--legacy-peer-deps` flag:
+
+```bash
+npm install --legacy-peer-deps
+```
 
 ## Project Structure
 
+Here's an overview of the project's directory structure:
+
 ```
 website/
-├── data/                      # Content and configuration
-│   ├── blog/                  # Blog posts (MDX files)
-│   ├── authors/               # Author profiles
-│   ├── projects.ts            # Projects data
-│   ├── references-data.bib    # Bibliography
-│   └── siteMetadata.js        # Site configuration
 ├── src/
-│   ├── app/                   # Next.js App Router pages
-│   │   ├── blog/              # Blog routes
-│   │   ├── tags/              # Tag pages
-│   │   ├── projects/          # Projects page
-│   │   ├── about/             # About page
-│   │   ├── layout.tsx         # Root layout
-│   │   └── page.tsx           # Homepage
-│   └── ui/                    # Reusable UI components
-│       ├── components/        # React components
-│       ├── layouts/           # Page layouts
-│       └── css/               # Stylesheets
-├── public/
-│   └── static/                # Static assets (images, favicons)
-├── contentlayer.config.ts     # Content processing config
-├── next.config.ts             # Next.js configuration
-├── tailwind.config.js         # Tailwind CSS config
-└── tsconfig.json              # TypeScript config
+│   ├── app/                       # Next.js App Router pages and routes
+│   │   ├── layout.tsx             # Root layout
+│   │   ├── page.tsx               # Homepage
+│   │   ├── blog/                  # Blog routes with colocated layouts
+│   │   ├── tags/                  # Tag pages
+│   │   ├── projects/              # Projects page
+│   │   └── about/                 # About page
+│   ├── components/                # Reusable UI components
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   ├── MDXComponents.tsx
+│   │   └── ... (other components)
+│   ├── lib/                       # Utility functions & configuration
+│   │   ├── siteMetadata.ts
+│   │   └── seo.ts
+│   └── styles/                    # Global stylesheets
+│       ├── tailwind.css
+│       └── prism.css
+├── public/static/                 # Static assets (images, favicons)
+├── contentlayer.config.ts         # Content processing configuration
+├── next.config.ts                 # Next.js configuration
+├── tailwind.config.js             # Tailwind CSS configuration
+└── tsconfig.json                  # TypeScript configuration
 ```
 
 ## Development Workflow
 
-### Adding a New Blog Post
+### Making Code Changes
 
-1. Create a new MDX file in `data/blog/`:
+1. **Create a feature branch:**
+
    ```bash
-   touch data/blog/my-new-post.mdx
+   git checkout -b feature/my-new-feature main
    ```
 
-2. Add frontmatter and content:
-   ```mdx
-   ---
-   title: 'My New Post'
-   date: '2025-11-30'
-   tags: ['nextjs', 'tutorial']
-   draft: false
-   summary: 'A brief summary of the post'
-   authors: ['default']
-   ---
+2. **Make your changes** in the appropriate files
 
-   # Your content here
+3. **Test your changes:**
 
-   This is the post content written in MDX (Markdown + JSX).
+   ```bash
+   npm run dev      # Test in development (http://localhost:3000)
+   npm run build    # Verify production build succeeds
+   npm run lint     # Check code quality with ESLint
    ```
 
-3. The post will automatically appear in the blog listing.
+   > **Important:** Always run `npm run build` before submitting a PR to ensure your changes don't break the production build.
 
-### Nested Blog Posts
+4. **Commit your changes:**
 
-You can organize posts in subdirectories:
-```
-data/blog/
-├── my-post.mdx
-├── kubernetes/
-│   └── k8s-tutorial.mdx
-└── ceph/
-    └── storage-guide.mdx
-```
+   ```bash
+   git add .
+   git commit -m "feat: add new feature"
+   ```
 
-### Adding a Project
+5. **Push and create a pull request**
 
-Edit `data/projects.ts` to add project information:
-```typescript
-const projectsData = [
-  {
-    title: 'Project Name',
-    description: 'Project description',
-    imgSrc: '/static/images/project.png',
-    href: 'https://github.com/user/project',
-  },
-]
-```
+### Component Development
 
-### Customizing Site Configuration
+When creating or modifying components:
 
-Edit `data/siteMetadata.js` to modify:
-- Site title and description
-- Navigation links
-- Analytics providers (Umami, Google Analytics, etc.)
-- Comment system (Giscus, Utterances, Disqus)
-- Newsletter integration
-- Search provider
+1. **Add components** to `src/components/` for reusable UI elements
+2. **Use TypeScript** with proper type definitions
+3. **Add `'use client'` directive** only when using hooks or browser APIs
+4. **Follow naming conventions** - use PascalCase for component files
 
-### Modifying Styles
-
-- **Global styles:** `src/ui/css/tailwind.css`
-- **Code highlighting:** `src/ui/css/prism.css`
-- **Tailwind config:** `tailwind.config.js`
-
-### Creating Custom Components
-
-Add React components to `src/ui/components/` and use them in MDX:
+Example component:
 
 ```tsx
-// src/ui/components/MyComponent.tsx
-export default function MyComponent({ children }) {
+// src/components/MyComponent.tsx
+'use client' // Only if needed
+
+interface MyComponentProps {
+  children: React.ReactNode
+}
+
+export default function MyComponent({ children }: MyComponentProps) {
   return <div className="my-custom-class">{children}</div>
 }
 ```
 
-Register in `src/ui/components/MDXComponents.tsx`:
-```tsx
-import MyComponent from './MyComponent'
+### Styling
 
-export const components = {
-  MyComponent,
-  // ... other components
-}
-```
-
-Use in MDX files:
-```mdx
-<MyComponent>
-  Custom content here
-</MyComponent>
-```
+- **Global styles:** Edit `src/styles/tailwind.css`
+- **Component styles:** Use Tailwind CSS utility classes
+- **Tailwind config:** Modify `tailwind.config.js` for theme customization
 
 ## Writing Content
 
-### Frontmatter Fields
+This project uses MDX (Markdown + JSX) for content. MDX allows you to use React components within Markdown documents.
 
-Required:
-- `title` - Post title
-- `date` - Publication date (YYYY-MM-DD)
+### MDX Basics
 
-Optional:
-- `tags` - Array of tags
-- `draft` - Set to `true` to hide from production
-- `summary` - Brief description
-- `authors` - Array of author IDs (must match files in `data/authors/`)
-- `layout` - Layout component to use
-- `canonicalUrl` - Canonical URL for SEO
-- `images` - Array of image URLs
+**Markdown Features:**
 
-### MDX Features
+- Standard Markdown syntax for headings, lists, links, etc.
+- Code blocks with syntax highlighting
+- Tables, blockquotes, and images
 
-- **Markdown:** Standard markdown syntax
-- **JSX:** Use React components inline
-- **Math:** KaTeX support with `$inline$` or `$$block$$`
-- **Code blocks:** Syntax highlighting with language tags
-- **Citations:** Bibliography support via `rehype-citation`
-- **GitHub Alerts:** Use `> [!NOTE]`, `> [!WARNING]`, etc.
+**Enhanced Features:**
 
-### Code Blocks
+- **JSX Components:** Use React components inline
+- **Math Equations:** KaTeX support with `$inline$` or `$$block$$` syntax
+- **GitHub Alerts:** `> [!NOTE]`, `> [!WARNING]`, `> [!TIP]`
+- **Code Highlighting:** Specify language for syntax highlighting
+
+### Code Block Examples
+
+Basic code block:
+
+````mdx
+```javascript
+const greeting = "Hello, World!"
+console.log(greeting)
+```
+````
+
+With line highlighting:
 
 ````mdx
 ```javascript title="example.js" {1,3-5}
@@ -246,96 +259,180 @@ function demo() {
 ```
 ````
 
-## Code Style
+## Coding Standards
 
-### Linting
+### TypeScript & React
+
+- Use **TypeScript** with strict mode enabled
+- Define proper types (avoid `any` when possible)
+- Use **Server Components** by default (better performance)
+- Add `'use client'` directive only when needed (hooks, browser APIs, interactivity)
+- Follow React 19 best practices
+- Use path aliases: `@/components/*`, `@/lib/*`, `@/styles/*`
+
+### Component Structure
+
+- Keep shared components in `src/components/`
+- Colocate route-specific layouts in their route directories
+- Use functional components with TypeScript interfaces for props
+- Follow the single responsibility principle
+
+### Linting & Formatting
 
 This project uses:
-- **ESLint** for code quality
-- **Prettier** for formatting
-- **TypeScript** for type safety
+
+- **ESLint 9** with flat config for code quality
+- **TypeScript ESLint** for TypeScript-specific rules
+- **Prettier** for code formatting (2-space indentation)
+- **Husky** for pre-commit hooks
+
+**ESLint Configuration:**
+
+- Enforces TypeScript best practices
+- Warns on unused variables (except those prefixed with `_`)
+- Checks for explicit `any` usage
+- Automatically ignores build directories (`.next/`, `.contentlayer/`, `out/`)
 
 Run checks before committing:
+
 ```bash
 npm run lint
 ```
 
-Auto-fix issues:
+Auto-fix issues (where possible):
+
 ```bash
 npm run lint:fix
 ```
 
-### Git Hooks
+> **Note:** Some issues require manual fixes. ESLint will report these as errors or warnings that can't be auto-fixed.
 
-Husky is configured to run checks on commit. Ensure your code passes linting before committing.
+### Commit Message Format
 
-## Submitting Changes
+Follow **conventional commits**:
+
+```
+<type>: <description>
+
+[optional body]
+[optional footer]
+```
+
+**Types:**
+
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `style:` - Code formatting (not CSS)
+- `refactor:` - Code restructuring
+- `test:` - Adding tests
+- `chore:` - Maintenance tasks
+
+**Examples:**
+
+```
+feat: add dark mode toggle to header
+fix: resolve mobile navigation overflow
+docs: update contributing guidelines
+refactor: simplify authentication logic
+```
+
+## Pull Request Guidelines
 
 ### Branch Naming
 
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `docs/` - Documentation updates
-- `chore/` - Maintenance tasks
+Follow this convention:
 
-### Commit Messages
+- `feature/descriptive-name` - New features
+- `fix/descriptive-name` - Bug fixes
+- `docs/descriptive-name` - Documentation updates
+- `refactor/descriptive-name` - Code refactoring
+- `chore/descriptive-name` - Maintenance tasks
 
-Follow conventional commits:
+### Creating a Pull Request
+
+1. **Fork the repository** and create a branch from `main`
+
+2. **Make your changes** following the coding standards
+
+3. **Test your changes:**
+
+   ```bash
+   npm run dev      # Test in development
+   npm run build    # Verify production build
+   npm run lint     # Check code quality
+   ```
+
+4. **Commit** using conventional commit format
+
+5. **Push** to your fork and create a pull request
+
+6. **Fill out the PR template** with relevant information:
+
+```markdown
+## Description
+
+Brief summary of what this PR does
+
+## Type of Change
+
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Documentation update
+- [ ] Refactoring
+- [ ] Performance improvement
+
+## Testing Checklist
+
+- [ ] Fresh install works (`npm install --legacy-peer-deps`)
+- [ ] Tested locally with `npm run dev`
+- [ ] Development build completes (`npm run build`)
+- [ ] Static export succeeds (`EXPORT=1 UNOPTIMIZED=1 npm run build`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] No TypeScript errors (`npm run build` or `tsc --noEmit`)
+- [ ] Cleared caches if needed (`.next/`, `.contentlayer/`)
+
+## Screenshots (if applicable)
+
+[Add screenshots for UI changes]
+
+## Related Issues
+
+Closes #123
 ```
-feat: add new blog post about Kubernetes
-fix: resolve navigation menu issue
-docs: update contributing guide
-style: format code with prettier
-```
 
-### Pull Request Process
+7. **Wait for review** and address any feedback
 
-1. Create a new branch from `dev`:
-   ```bash
-   git checkout -b feature/my-new-feature dev
-   ```
+### PR Review Criteria
 
-2. Make your changes and commit:
-   ```bash
-   git add .
-   git commit -m "feat: add new feature"
-   ```
+Maintainers will check:
 
-3. Push to your fork:
-   ```bash
-   git push origin feature/my-new-feature
-   ```
-
-4. Open a Pull Request against the `dev` branch
-
-5. Ensure CI checks pass
-
-6. Wait for review and address feedback
-
-## Tech Stack
-
-- **Framework:** Next.js 15 (App Router)
-- **Styling:** Tailwind CSS
-- **Content:** Contentlayer (MDX processing)
-- **UI Library:** Headless UI
-- **Search:** Kbar
-- **Comments:** Giscus
-- **Analytics:** Umami
-- **Deployment:** GitHub Pages
-
-## Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [MDX](https://mdxjs.com/)
-- [Contentlayer](https://contentlayer.dev/)
-- [Pliny](https://github.com/timlrx/pliny) - Utility library for this blog
+- ✅ Code follows TypeScript and React best practices
+- ✅ Linting passes without errors
+- ✅ Build completes successfully
+- ✅ Changes are well-documented
+- ✅ Commit messages follow conventional format
+- ✅ No breaking changes without discussion
 
 ## Questions?
 
-If you have questions or need help, please:
-1. Check existing issues
-2. Review the documentation
-3. Open a new issue with details
+If you have questions or need help:
 
-Thank you for contributing! 🎉
+1. 📖 Check [README.md](README.md) for project overview
+2. 🔍 Search existing [GitHub Issues](https://github.com/chanchiwai-ray/chanchiwai-ray.github.io/issues)
+3. 💬 Open a new issue with your question
+4. 📧 For security concerns, contact the maintainer directly
+
+### Helpful Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [MDX Documentation](https://mdxjs.com/)
+
+---
+
+**Happy contributing!** 🎉
+
+> **Note for Maintainers:** See [CONTRIBUTING.maintainer.md](CONTRIBUTING.maintainer.md) for content management and site configuration instructions.

@@ -7,12 +7,12 @@ import { allCoreContent, coreContent, sortPosts } from "pliny/utils/contentlayer
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import siteMetadata from "@/data/siteMetadata"
-import { components } from "@/ui/components/MDXComponents"
-import "@/ui/css/prism.css"
-import PostBanner from "@/ui/layouts/PostBanner"
-import PostLayout from "@/ui/layouts/PostLayout"
-import PostSimple from "@/ui/layouts/PostSimple"
+import siteMetadata from "@/lib/siteMetadata"
+import { components } from "@/components/MDXComponents"
+import "@/styles/prism.css"
+import PostBanner from "../PostBanner"
+import PostLayout from "../PostLayout"
+import PostSimple from "../PostSimple"
 
 const defaultLayout = "PostLayout"
 const layouts = {

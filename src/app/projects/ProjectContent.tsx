@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 
-import { Project } from "@/data/projects"
-import Image from "@/ui/components/Image"
-import Link from "@/ui/components/Link"
+import { Project } from "@/lib/projects"
+import Image from "@/components/Image"
+import Link from "@/components/Link"
 
 const PROJECTS_PER_PAGE = 3
 

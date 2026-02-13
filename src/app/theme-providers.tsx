@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "next-themes"
 
-import siteMetadata from "@/data/siteMetadata"
+import siteMetadata from "@/lib/siteMetadata"
 
 export function ThemeProviders({ children }: { children: React.ReactNode }) {
   return (

@@ -1,8 +1,8 @@
 import type { Authors } from "contentlayer/generated"
 import { ReactNode } from "react"
 
-import projects from "@/data/projects"
-import Image from "@/ui/components/Image"
+import projects from "@/lib/projects"
+import Image from "@/components/Image"
 
 interface Props {
   children: ReactNode

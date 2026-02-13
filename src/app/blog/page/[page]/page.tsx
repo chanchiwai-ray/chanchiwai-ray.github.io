@@ -3,8 +3,8 @@ import { allCoreContent, sortPosts } from "pliny/utils/contentlayer"
 
 import { notFound } from "next/navigation"
 
-import siteMetadata from "@/data/siteMetadata"
-import ListLayoutWithTags from "@/ui/layouts/ListLayoutWithTags"
+import siteMetadata from "@/lib/siteMetadata"
+import ListLayoutWithTags from "../../ListLayoutWithTags"
 
 const POSTS_PER_PAGE = 5
 
