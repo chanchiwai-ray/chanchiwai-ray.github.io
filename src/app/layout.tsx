@@ -9,11 +9,11 @@ import { Metadata } from "next"
 import { Space_Grotesk } from "next/font/google"
 
 import { ThemeProviders } from "@/app/theme-providers"
-import siteMetadata from "@/data/siteMetadata"
-import Footer from "@/ui/components/Footer"
-import Header from "@/ui/components/Header"
-import SectionContainer from "@/ui/components/SectionContainer"
-import "@/ui/css/tailwind.css"
+import siteMetadata from "@/lib/siteMetadata"
+import Footer from "@/components/Footer"
+import Header from "@/components/Header"
+import SectionContainer from "@/components/SectionContainer"
+import "@/styles/tailwind.css"
 
 const space_grotesk = Space_Grotesk({
   subsets: ["latin"],

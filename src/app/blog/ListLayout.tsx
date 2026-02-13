@@ -6,9 +6,9 @@ import { CoreContent } from "pliny/utils/contentlayer"
 import { formatDate } from "pliny/utils/formatDate"
 import { useState } from "react"
 
-import Link from "@/ui/components/Link"
-import { Pagination, PaginationProps } from "@/ui/components/Pagination"
-import Tag from "@/ui/components/Tag"
+import Link from "@/components/Link"
+import { Pagination, PaginationProps } from "@/components/Pagination"
+import Tag from "@/components/Tag"
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]

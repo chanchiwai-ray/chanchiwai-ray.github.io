@@ -3,13 +3,13 @@ import { PlinyConfig } from "pliny/config"
 import { CoreContent } from "pliny/utils/contentlayer"
 import { ReactNode } from "react"
 
-import Comments from "@/ui/components/Comments"
-import Image from "@/ui/components/Image"
-import Link from "@/ui/components/Link"
-import PageTitle from "@/ui/components/PageTitle"
-import ScrollTopAndComment from "@/ui/components/ScrollTopAndComment"
-import SectionContainer from "@/ui/components/SectionContainer"
-import Tag from "@/ui/components/Tag"
+import Comments from "@/components/Comments"
+import Image from "@/components/Image"
+import Link from "@/components/Link"
+import PageTitle from "@/components/PageTitle"
+import ScrollTopAndComment from "@/components/ScrollTopAndComment"
+import SectionContainer from "@/components/SectionContainer"
+import Tag from "@/components/Tag"
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: "long",

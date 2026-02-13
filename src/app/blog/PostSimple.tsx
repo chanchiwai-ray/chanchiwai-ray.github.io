@@ -4,11 +4,11 @@ import { CoreContent } from "pliny/utils/contentlayer"
 import { formatDate } from "pliny/utils/formatDate"
 import { ReactNode } from "react"
 
-import Comments from "@/ui/components/Comments"
-import Link from "@/ui/components/Link"
-import PageTitle from "@/ui/components/PageTitle"
-import ScrollTopAndComment from "@/ui/components/ScrollTopAndComment"
-import SectionContainer from "@/ui/components/SectionContainer"
+import Comments from "@/components/Comments"
+import Link from "@/components/Link"
+import PageTitle from "@/components/PageTitle"
+import ScrollTopAndComment from "@/components/ScrollTopAndComment"
+import SectionContainer from "@/components/SectionContainer"
 
 interface LayoutProps {
   content: CoreContent<Blog>

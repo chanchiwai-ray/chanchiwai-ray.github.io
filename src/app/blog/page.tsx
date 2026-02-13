@@ -1,10 +1,10 @@
 import { allBlogs } from "contentlayer/generated"
 import { allCoreContent, sortPosts } from "pliny/utils/contentlayer"
 
-import { genPageMetadata } from "@/app/seo"
-import siteMetadata from "@/data/siteMetadata"
-import BlogLayout from "@/ui/layouts/BlogLayout"
-import ListLayoutWithTags from "@/ui/layouts/ListLayoutWithTags"
+import { genPageMetadata } from "@/lib/seo"
+import siteMetadata from "@/lib/siteMetadata"
+import BlogLayout from "./BlogLayout"
+import ListLayoutWithTags from "./ListLayoutWithTags"
 
 const POSTS_PER_PAGE = 5
 

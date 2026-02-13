@@ -1,7 +1,7 @@
-import { genPageMetadata } from "@/app/seo"
-import projects from "@/data/projects"
-import ProjectContent from "@/ui/layouts/ProjectContent"
-import ProjectLayout from "@/ui/layouts/ProjectLayout"
+import { genPageMetadata } from "@/lib/seo"
+import projects from "@/lib/projects"
+import ProjectContent from "./ProjectContent"
+import ProjectLayout from "./ProjectLayout"
 
 export const metadata = genPageMetadata({ title: "Projects" })
 
